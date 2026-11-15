@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>نظام إدارة المستودعات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: dark warehouse-floor look taken from the explainer video; hero = headline + big video frame, then problem -> live map -> features -> steps -> CTA */
+:root{
+  --bg:#070b12; --bg2:#0b111b; --panel:#0f1622; --panel2:#131c2b; --line:#1d2839;
+  --text:#e9eef5; --mute:#8f9cae; --amber:#f0a82a; --amber-d:#b97d12; --teal:#3fd0c4; --blue:#3f77b0; --red:#e0584a;
+  --font:'Cairo',system-ui,'Segoe UI',Tahoma,sans-serif; --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:17px;line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1160px;margin-inline:auto}
+main{overflow-x:clip}
+section{padding-block:88px;position:relative}
+h1,h2,h3{line-height:1.25;text-wrap:balance;font-weight:800}
+h2{font-size:clamp(28px,4vw,44px)}
+.hl{color:var(--amber)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--teal);letter-spacing:.3px;margin-bottom:14px}
+.eyebrow::before{content:"";width:22px;height:2px;background:var(--teal);border-radius:2px}
+.lead{color:var(--mute);max-width:640px;font-size:18px}
+
+/* background grid + glow */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(900px 500px at 80% -10%,rgba(63,119,176,.22),transparent 60%),
+   radial-gradient(700px 400px at 10% 10%,rgba(240,168,42,.10),transparent 60%),
+   linear-gradient(var(--line) 1px,transparent 1px) 0 0/56px 56px,
+   linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/56px 56px;
+  opacity:.55;-webkit-mask-image:linear-gradient(#000 20%,transparent 85%);mask-image:linear-gradient(#000 20%,transparent 85%)}
+
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));
+  background:rgba(7,11,18,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.logo i{width:34px;height:34px;border-radius:9px;background:var(--amber);display:grid;place-items:center}
+.logo svg{width:20px;height:20px}
+.links{display:flex;gap:26px;color:var(--mute);font-weight:600;font-size:15px}
+.links a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 22px;border-radius:12px;font-weight:700;font-size:16px;font-family:inherit;border:1px solid transparent;cursor:pointer;transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn svg{width:19px;height:19px;flex:none}
+.btn-wa{background:#25d366;color:#04220f}
+.btn-wa:hover{background:#3be07a}
+.btn-call{background:var(--amber);color:#1a1203}
+.btn-call:hover{background:#ffbc40}
+.btn-ghost{border-color:var(--line);background:var(--panel);color:var(--text)}
+.btn-ghost:hover{border-color:var(--teal)}
+.nav .btn{padding:9px 18px;font-size:15px}
+
+/* hero */
+.hero{padding-top:64px;padding-bottom:40px;text-align:center}
+.hero h1{font-size:clamp(34px,6vw,70px);font-weight:900;max-width:900px;margin-inline:auto}
+.hero p.lead{margin:22px auto 0}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+.video-wrap{margin:56px auto 0;max-width:1040px;position:relative}
+.video-wrap::before{content:"";position:absolute;inset:-30px;background:radial-gradient(closest-side,rgba(240,168,42,.22),transparent 70%);z-index:-1;filter:blur(20px);animation:breathe 5s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.55;transform:scale(.97)}}
+.frame{border-radius:20px;border:1px solid #2a3a52;background:var(--panel);overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.8)}
+.frame-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.frame-bar b{width:10px;height:10px;border-radius:50%;background:#2b3950}
+.frame-bar span{margin-inline-start:auto;font-size:13px;color:var(--mute);font-family:var(--mono)}
+.player{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer}
+.player video{width:100%;height:100%;display:block;object-fit:cover}
+.play{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(transparent 40%,rgba(0,0,0,.55));transition:opacity .25s}
+.play button{width:92px;height:92px;border-radius:50%;border:0;background:var(--amber);color:#1a1203;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 0 rgba(240,168,42,.6);animation:pulse 2.2s infinite}
+.play button svg{width:36px;height:36px;margin-inline-start:-4px}
+@keyframes pulse{70%{box-shadow:0 0 0 26px rgba(240,168,42,0)}100%{box-shadow:0 0 0 0 rgba(240,168,42,0)}}
+.play small{position:absolute;bottom:18px;inset-inline:0;text-align:center;font-weight:700;color:#fff;text-shadow:0 2px 8px #000}
+.player.playing .play{opacity:0;pointer-events:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
+.stat{padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(15,22,34,.7)}
+.stat b{display:block;font-size:30px;font-weight:900;color:var(--amber);font-family:var(--mono);direction:ltr}
+.stat span{color:var(--mute);font-size:14px}
+
+/* problem */
+.problem{background:var(--bg2);border-block:1px solid var(--line)}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.pcard{padding:28px;border-radius:18px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden}
+.pcard .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:rgba(224,88,74,.12);color:var(--red);margin-bottom:16px}
+.pcard .ic svg{width:26px;height:26px}
+.pcard h3{font-size:20px;margin-bottom:6px}
+.pcard p{color:var(--mute);font-size:15.5px}
+
+/* live map */
+.twin-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:34px;align-items:center;margin-top:44px}
+.map{padding:22px;border-radius:20px;background:var(--panel);border:1px solid #2a3a52}
+.map-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:14px;color:var(--mute)}
+.map-head b{color:var(--text);font-family:var(--mono);direction:ltr}
+.live{display:inline-flex;align-items:center;gap:7px;color:var(--teal);font-weight:700}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--teal);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.areas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;direction:ltr}
+.area{padding:10px;border-radius:12px;background:var(--bg2);border:1px solid var(--line)}
+.area h4{font-family:var(--mono);font-size:12px;color:var(--mute);margin-bottom:8px;display:flex;justify-content:space-between}
+.cells{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.cell{aspect-ratio:1.25;border-radius:4px;background:#17212f;border:1px solid #223048;transition:background .4s,border-color .4s,box-shadow .4s}
+.cell.on{background:#7a5516;border-color:var(--amber-d)}
+.cell.blk{background:repeating-linear-gradient(45deg,#3a1f1d,#3a1f1d 3px,#2a1615 3px,#2a1615 6px);border-color:#5a2c28}
+.cell.flash{background:var(--amber);border-color:#ffd37a;box-shadow:0 0 0 4px rgba(240,168,42,.3)}
+.legend{display:flex;gap:16px;margin-top:14px;font-size:13px;color:var(--mute);flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
+.log{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;direction:ltr;font-family:var(--mono);font-size:12.5px;min-height:116px}
+.log div{display:flex;gap:12px;padding:4px 0;color:var(--mute);animation:slidein .4s}
+.log div b{color:var(--amber)}
+.log div em{font-style:normal;color:var(--teal)}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px)}}
+.chain{display:flex;flex-direction:column;gap:0;direction:rtl}
+.chain div{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px dashed var(--line);font-weight:700}
+.chain div:last-child{border:0}
+.chain i{width:34px;height:34px;border-radius:9px;background:var(--panel2);border:1px solid #2a3a52;display:grid;place-items:center;font-style:normal;font-family:var(--mono);font-size:13px;color:var(--amber);flex:none}
+.chain span{color:var(--mute);font-weight:500;font-size:14.5px;margin-inline-start:auto}
+.code{margin-top:22px;padding:14px 18px;border-radius:12px;background:#05080d;border:1px solid var(--line);font-family:var(--mono);direction:ltr;text-align:center;font-size:15px;color:var(--teal);letter-spacing:.5px}
+.code em{font-style:normal;color:var(--amber)}
+
+/* features */
+.features{background:var(--bg2);border-block:1px solid var(--line)}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+.fcard{padding:28px;border-radius:18px;background:var(--panel);border:1px solid var(--line);transition:transform .25s,border-color .25s}
+.fcard:hover{transform:translateY(-6px);border-color:var(--amber-d)}
+.fcard .ic{width:50px;height:50px;border-radius:13px;background:rgba(240,168,42,.12);color:var(--amber);display:grid;place-items:center;margin-bottom:16px}
+.fcard .ic svg{width:27px;height:27px}
+.fcard h3{font-size:20px;margin-bottom:8px}
+.fcard p{color:var(--mute);font-size:15.5px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:44px;counter-reset:s}
+.step{padding:26px 22px;border-radius:18px;border:1px solid var(--line);background:var(--panel);position:relative}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:-16px;inset-inline-start:22px;width:34px;height:34px;border-radius:50%;background:var(--amber);color:#1a1203;font-weight:900;display:grid;place-items:center;font-family:var(--mono)}
+.step h3{font-size:18px;margin:8px 0 6px}
+.step p{color:var(--mute);font-size:15px}
+
+/* integrations */
+.integ{background:var(--bg2);border-block:1px solid var(--line)}
+.int-box{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.nodes{position:relative;height:260px;direction:ltr}
+.node{position:absolute;padding:10px 18px;border-radius:12px;background:var(--panel2);border:1px solid #2a3a52;font-weight:700;font-size:15px}
+.node.c{left:50%;top:50%;transform:translate(-50%,-50%);background:var(--amber);color:#1a1203;border-color:var(--amber);font-size:17px;padding:16px 26px;z-index:2}
+.node.a{left:2%;top:6%}.node.b{right:2%;top:6%}.node.d{left:2%;bottom:6%}.node.e{right:2%;bottom:6%}
+.nodes svg{position:absolute;inset:0;width:100%;height:100%}
+.nodes line{stroke:var(--teal);stroke-width:2;stroke-dasharray:6 8;animation:dash 1.4s linear infinite;opacity:.7}
+@keyframes dash{to{stroke-dashoffset:-28}}
+
+/* for whom */
+.chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.chip{padding:12px 22px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:700}
+
+/* final cta */
+.final{text-align:center}
+.final-box{padding:64px 28px;border-radius:28px;border:1px solid #2a3a52;position:relative;overflow:hidden;
+  background:radial-gradient(600px 300px at 50% 0%,rgba(240,168,42,.18),transparent 70%),var(--panel)}
+.final h2{font-size:clamp(30px,5vw,54px);max-width:760px;margin-inline:auto}
+.final .lead{margin:16px auto 0}
+.num{margin-top:26px;font-family:var(--mono);font-size:22px;direction:ltr;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding-block:26px;text-align:center;color:var(--mute);font-size:14px}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+.nojs .rv{opacity:1;transform:none}
+
+@media(max-width:900px){
+  section{padding-block:60px}
+  .links{display:none}
+  .cards3,.fgrid,.steps{grid-template-columns:1fr}
+  .twin-grid,.int-box{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .nav .btn span{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body class="nojs">
+
+<header>
+  <div class="wrap nav">
+    <a href="#top" class="logo"><i><svg viewBox="0 0 24 24" fill="none" stroke="#1a1203" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-5 9 5v11H3z"/><path d="M8 20v-6h8v6"/></svg></i>نظام المستودع</a>
+    <nav class="links"><a href="#problem">المشكلة</a><a href="#map">كيف بيشتغل</a><a href="#features">المميزات</a><a href="#steps">خطوات البدء</a></nav>
+    <a class="btn btn-wa" data-wa href="#contact"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.4c-.1.2-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.6-.1 1.2z"/></svg><span>واتساب</span></a>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap">
+    <h1 class="rv">فوضى بالمستودع؟<br><span class="hl">وين بضاعتك الآن؟</span></h1>
+    <p class="lead rv">نمثّل مستودعك بصفوفه ومواقعه وطبقاته كما هو على أرض الواقع، ونعرّف كل بضاعة بالوسيلة الأنسب لك (باركود، QR، أو غيره). تعرف مكان أي صنف خلال ثوانٍ، وتُسجَّل كل حركة دخول وخروج باسم من نفّذها.</p>
+    <div class="cta-row rv">
+      <a class="btn btn-call" data-call href="#contact"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.25 11.4 11.4 0 003.6.6 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.6 3.6a1 1 0 01-.25 1z"/></svg>اطلب عرض سعر مخصص</a>
+      <a class="btn btn-ghost" href="#map">شوف كيف بيشتغل</a>
+    </div>
+
+    <div class="video-wrap rv">
+      <div class="frame">
+        <div class="frame-bar"><b></b><b></b><b></b><span>شاهد الفكرة في 78 ثانية</span></div>
+        <div class="player" id="player">
+          <video id="vid" preload="metadata" poster="poster.jpg" playsinline controls controlslist="nodownload"><source src="video.mp4" type="video/mp4"></video>
+          <div class="play" id="play"><button aria-label="تشغيل الفيديو"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><small>شغّل الفيديو</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats rv">
+      <div class="stat"><b data-n="100">0</b><span>% من حركة البضاعة مسجّلة</span></div>
+      <div class="stat"><b style="font-size:21px;line-height:2.2">QR · Barcode</b><span>أو أي وسيلة تعريف بتناسبك</span></div>
+      <div class="stat"><b data-n="3">0</b><span>واجهات: عامل، إدارة، موردين</span></div>
+      <div class="stat"><b data-n="0">0</b><span>تخمين: كل موقع معروف</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="problem" id="problem">
+  <div class="wrap">
+    <div class="eyebrow rv">المشكلة</div>
+    <h2 class="rv">أغلب المستودعات بتواجه <span class="hl">نفس الفوضى</span></h2>
+    <p class="lead rv">إما عندك سيستم ما بناسب شغلك، أو ما عندك سيستم أصلاً. بالحالتين النتيجة وحدة.</p>
+    <div class="cards3">
+      <div class="pcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v3.5M11 14.5v.01"/></svg></div><h3>ما حدا بعرف وين البضاعة</h3><p>العامل بدوّر بين الرفوف، وبضاعة الموردين مخلوطة، والوقت بروح بالسؤال بدل الشغل.</p></div>
+      <div class="pcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.01"/></svg></div><h3>سيستم ما بناسب شغلك</h3><p>برنامج جاهز بصيغ ثابتة، وأنت اللي لازم تغيّر طريقة شغلك عشانه.</p></div>
+      <div class="pcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg></div><h3>أرقام ما بتطابق الواقع</h3><p>الكميات والفواتير والمخزون كل واحد بدفتر، والجرد بكشف الفروقات بعد فوات الأوان.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="map">
+  <div class="wrap">
+    <div class="eyebrow rv">النسخة الرقمية لمستودعك</div>
+    <h2 class="rv">كل حركة بتظهر <span class="hl">لحظة حدوثها</span></h2>
+    <p class="lead rv">هاي الخريطة بتتحدث مباشرة. العامل بسجّل الحركة بالوسيلة اللي بتناسب مستودعك (مسح باركود أو QR أو غيره) فيتحوّل الموقع من فاضي إلى مشغول، وبينسجل مين عمل شو ومتى.</p>
+    <div class="twin-grid">
+      <div class="map rv">
+        <div class="map-head"><span class="live">مباشر</span><b>WH01 · المستودع الرئيسي</b></div>
+        <div class="areas" id="areas"></div>
+        <div class="legend"><span><i style="background:#17212f;border:1px solid #223048"></i>فاضي</span><span><i style="background:#7a5516"></i>مشغول</span><span><i style="background:#3a1f1d"></i>غير متاح</span><span><i style="background:var(--amber)"></i>حركة جديدة</span></div>
+        <div class="log" id="log"></div>
+      </div>
+      <div class="rv">
+        <div class="chain">
+          <div><i>1</i>المستودع<span>WH01</span></div>
+          <div><i>2</i>منطقة التخزين<span>A01</span></div>
+          <div><i>3</i>الصف<span>R01</span></div>
+          <div><i>4</i>الموقع / العمق<span>P01</span></div>
+          <div><i>5</i>الطابق<span>L01</span></div>
+          <div><i>6</i>الطبلية / الوحدة<span>باركود أو QR</span></div>
+        </div>
+        <div class="code">WH01-A01-R01-P01-<em>L01</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="eyebrow rv">شو بميّزنا</div>
+    <h2 class="rv">مش سيستم جاهز.<br><span class="hl">سيستم مبني على مستودعك</span></h2>
+    <div class="fgrid">
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v.01M14 20h.01M20 20h1"/></svg></div><h3>تعريف حسب مستودعك</h3><p>باركود، QR، أو أي وسيلة تناسب شغلك ونوع بضاعتك. بتحدد معنا شو بينقصك، وإحنا بنعطيك الحل المناسب. مسح واحد بيعطيك المحتوى والمورد والموقع.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10l8-6 8 6v10M9 20v-6h6v6"/></svg></div><h3>خريطة بشكل مستودعك الفعلي</h3><p>الممرات والصفوف والطوابق والأبواب مرسومة زي الواقع، مع إشغال كل منطقة ظاهر قبل ما تفتحها.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div><h3>يفهم التكديس الفيزيائي</h3><p>ما بسمح بسحب وحدة تخزين وفوقها وحدة ثانية، ولا بوضع وحدة بطابق ما تحته إشي. الأخطاء المستحيلة فيزيائياً بتنمنع من الأساس.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><circle cx="19" cy="19" r="2"/></svg></div><h3>سجل حركات كامل</h3><p>كل إدخال وإخراج ونقل مسجّل بالمستخدم والوقت والموقع السابق والجديد. بتقدر ترجع لأي حركة وقت ما بدك.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3.5 3.5 0 010 7M22 20c0-2.5-1.5-4.4-4-5.3"/></svg></div><h3>بوابة للموردين</h3><p>كل مورد بشوف مخزونه وحركاته وكشف حسابه بنفسه، وإنت بتوفر مكالمات "وين بضاعتي؟".</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h3M8 17h6"/></svg></div><h3>فوترة تخزين دقيقة</h3><p>الحساب باليوم الفعلي وبالكمية الفعلية، مش بالكمية الأخيرة. كشف شهري جاهز بأسعار وإضافات تحددها أنت.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="steps">
+  <div class="wrap">
+    <div class="eyebrow rv">خطوات البدء</div>
+    <h2 class="rv">من أول اجتماع <span class="hl">لأول حركة مسجّلة</span></h2>
+    <div class="steps">
+      <div class="step rv"><h3>بنسمع مشكلتك</h3><p>نفهم شغلك وطريقة تخزينك وشو اللي مش ماشي.</p></div>
+      <div class="step rv"><h3>بنرسم مستودعك</h3><p>مناطق وصفوف وطوابق زي ما هي على أرض الواقع.</p></div>
+      <div class="step rv"><h3>بنجهّز وسيلة التعريف ونجرّب</h3><p>فريقك بتدرب على الواجهة بدقائق، بدون تعقيد.</p></div>
+      <div class="step rv"><h3>بتشتغل وبتشوف الفرق</h3><p>الإدارة بتتابع الخريطة والتقارير لحظة بلحظة.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="integ">
+  <div class="wrap int-box">
+    <div>
+      <div class="eyebrow rv">الربط والتوسّع</div>
+      <h2 class="rv">بيتّصل مع أنظمتك،<br><span class="hl">وإذا ما عندك بنبنيلك إياه</span></h2>
+      <p class="lead rv" style="margin-top:16px">عندك نظام محاسبة أو موارد بشرية؟ بنربط المستودع معه. ما عندك؟ بنبنيه لك كجزء من نفس الحل.</p>
+    </div>
+    <div class="nodes rv">
+      <svg viewBox="0 0 400 260" preserveAspectRatio="none"><line x1="200" y1="130" x2="60" y2="35"/><line x1="200" y1="130" x2="340" y2="35"/><line x1="200" y1="130" x2="60" y2="225"/><line x1="200" y1="130" x2="340" y2="225"/></svg>
+      <div class="node a">المحاسبة</div><div class="node b">الموارد البشرية</div><div class="node d">بوابة الموردين</div><div class="node e">التقارير</div>
+      <div class="node c">نظام المستودع</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv">لمين مناسب</div>
+    <h2 class="rv">أي نشاط <span class="hl">بيخزّن لحساب نفسه أو لغيره</span></h2>
+    <div class="chips rv"><span class="chip">مستودعات تخزين لصالح موردين</span><span class="chip">مخازن تبريد وتجميد</span><span class="chip">شركات توزيع</span><span class="chip">مصانع ومخازن مواد خام</span><span class="chip">شركات لوجستية</span><span class="chip">مخازن بضائع جمركية</span></div>
+  </div>
+</section>
+
+<section class="final" id="contact">
+  <div class="wrap">
+    <div class="final-box rv">
+      <h2>سواء عندك سيستم أو لأ،<br><span class="hl">احكيلنا مشكلتك</span></h2>
+      <p class="lead">وإحنا بنبنيلك حل إلها. العرض بيتحدد حسب حجم مستودعك وطريقة شغلك، فما في أسعار جاهزة، وبتحصل على عرض مخصص.</p>
+      <div class="cta-row">
+        <a class="btn btn-wa" data-wa href="#contact"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.4c-.1.2-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.6-.1 1.2z"/></svg>راسلنا على واتساب</a>
+        <a class="btn btn-call" data-call href="#contact"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.25 11.4 11.4 0 003.6.6 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.6 3.6a1 1 0 01-.25 1z"/></svg>اتصل فينا</a>
+      </div>
+      <div class="num" id="numtxt">00962 79 176 5232</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>نظام إدارة مستودعات مبني حسب الطلب</footer>
+
+<script>
+(function(){
+  var PHONE = "962791765232";            /* رقم التواصل بصيغة دولية بدون + */
+  var MSG = encodeURIComponent("مرحباً، بدي أعرف أكثر عن نظام إدارة المستودعات وأطلب عرض سعر.");
+  document.querySelectorAll('[data-wa]').forEach(function(a){a.href="https://wa.me/"+PHONE+"?text="+MSG;a.target="_blank";a.rel="noopener"});
+  document.querySelectorAll('[data-call]').forEach(function(a){a.href="tel:+"+PHONE});
+
+  /* video */
+  var vid=document.getElementById('vid'), player=document.getElementById('player'), play=document.getElementById('play');
+  play.addEventListener('click',function(){player.classList.add('playing');var p=vid.play();if(p&&p.catch)p.catch(function(){player.classList.remove('playing')})});
+  vid.addEventListener('pause',function(){if(!vid.ended&&vid.currentTime<1)player.classList.remove('playing')});
+
+  /* reveal on scroll */
+  document.body.classList.remove('nojs');
+  var rv=document.querySelectorAll('.rv');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+    rv.forEach(function(el){io.observe(el)});
+    setTimeout(function(){rv.forEach(function(el){var r=el.getBoundingClientRect();if(r.top<innerHeight)el.classList.add('in')})},300);
+  }else rv.forEach(function(el){el.classList.add('in')});
+
+  /* counters */
+  var cio=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;var el=e.target,n=+el.dataset.n,t0=performance.now();
+    (function f(t){var k=Math.min(1,(t-t0)/1200);el.textContent=Math.round(n*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0);cio.unobserve(el)})},{threshold:.6});
+  document.querySelectorAll('[data-n]').forEach(function(el){cio.observe(el)});
+
+  /* live map simulation */
+  var areasEl=document.getElementById('areas'), logEl=document.getElementById('log'), cells=[];
+  ['A01','A02','A03'].forEach(function(code,ai){
+    var a=document.createElement('div');a.className='area';a.innerHTML='<h4><span>'+code+'</span><span>R01-R03</span></h4>';
+    var g=document.createElement('div');g.className='cells';
+    for(var i=0;i<12;i++){var c=document.createElement('div');c.className='cell';
+      var r=Math.random();if(r<.5)c.classList.add('on');else if(r>.94)c.classList.add('blk');
+      c.dataset.loc='WH01-'+code+'-R0'+(Math.floor(i/4)+1)+'-P0'+(i%4+1);g.appendChild(c);cells.push(c)}
+    a.appendChild(g);areasEl.appendChild(a)});
+  var users=['Ahmad','Sara','Omar','Lina'];
+  function pad(n){return n<10?'0'+n:n}
+  function tick(){
+    var free=cells.filter(function(c){return !c.classList.contains('blk')});
+    var c=free[Math.floor(Math.random()*free.length)], wasOn=c.classList.contains('on'), op=wasOn?'OUT':'IN';
+    c.classList.add('flash');
+    setTimeout(function(){c.classList.remove('flash');c.classList.toggle('on',!wasOn)},700);
+    var d=new Date(),row=document.createElement('div');
+    row.innerHTML='<span>'+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+'</span><b>'+op+'</b><span>'+c.dataset.loc+'</span><em>'+users[Math.floor(Math.random()*users.length)]+'</em>';
+    logEl.insertBefore(row,logEl.firstChild);while(logEl.children.length>4)logEl.removeChild(logEl.lastChild);
+  }
+  tick();setInterval(tick,1800);
+})();
+</script>
+</body>
+</html>
