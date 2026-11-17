@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>نظام إدارة المستودعات</title>
@@ -186,7 +187,7 @@ footer{border-top:1px solid var(--line);padding-block:26px;text-align:center;col
 <header>
   <div class="wrap nav">
     <a href="#top" class="logo"><i><svg viewBox="0 0 24 24" fill="none" stroke="#1a1203" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-5 9 5v11H3z"/><path d="M8 20v-6h8v6"/></svg></i>نظام المستودع</a>
-    <nav class="links"><a href="#problem">المشكلة</a><a href="#map">كيف بيشتغل</a><a href="#features">المميزات</a><a href="#steps">خطوات البدء</a></nav>
+    <nav class="links"><a href="designer.html" style="color:var(--amber);font-weight:800">صمّم مستودعك</a><a href="#problem">المشكلة</a><a href="#map">كيف بيشتغل</a><a href="#features">المميزات</a><a href="#steps">خطوات البدء</a></nav>
     <a class="btn btn-wa" data-wa href="#contact"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.4c-.1.2-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.6-.1 1.2z"/></svg><span>واتساب</span></a>
   </div>
 </header>
@@ -196,6 +197,7 @@ footer{border-top:1px solid var(--line);padding-block:26px;text-align:center;col
   <div class="wrap">
     <h1 class="rv">فوضى بالمستودع؟<br><span class="hl">وين بضاعتك الآن؟</span></h1>
     <p class="lead rv">نمثّل مستودعك بصفوفه ومواقعه وطبقاته كما هو على أرض الواقع، ونعرّف كل بضاعة بالوسيلة الأنسب لك (باركود، QR، أو غيره). تعرف مكان أي صنف خلال ثوانٍ، وتُسجَّل كل حركة دخول وخروج باسم من نفّذها.</p>
+    <div class="rv" style="margin:26px 0 18px"><a class="btn btn-call" href="designer.html" style="font-size:clamp(18px,2.6vw,24px);padding:18px 38px;border-radius:16px;font-weight:900;box-shadow:0 0 0 4px rgba(240,168,42,.22),0 12px 40px rgba(240,168,42,.35)">🏗 صمّم مستودعك بنفسك ←</a></div>
     <div class="cta-row rv">
       <a class="btn btn-call" data-call href="#contact"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.25 11.4 11.4 0 003.6.6 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.6 3.6a1 1 0 01-.25 1z"/></svg>اطلب عرض سعر مخصص</a>
       <a class="btn btn-ghost" href="#map">شوف كيف بيشتغل</a>
@@ -260,6 +262,7 @@ footer{border-top:1px solid var(--line);padding-block:26px;text-align:center;col
   </div>
 </section>
 
+<section style="padding:56px 0"><div class="wrap" style="text-align:center"><div style="border:1px solid var(--amber);background:linear-gradient(135deg,rgba(240,168,42,.12),transparent);border-radius:22px;padding:40px 22px"><h2 style="font-size:clamp(26px,4vw,40px);font-weight:900;margin-bottom:10px">صمّم مستودعك بنفسك. وشوف رحلة بضاعتك فيه.</h2><p style="color:var(--mute);margin-bottom:22px">مجسّم ثلاثي الأبعاد: ركّب المناطق والرفوف، وبعدها شوف الاستلام والتخزين والسحب والفاتورة على تصميمك.</p><a class="btn btn-call" href="designer.html">ابدأ التصميم ←</a></div></div></section>
 <section class="features" id="features">
   <div class="wrap">
     <div class="eyebrow rv">شو بميّزنا</div>
@@ -377,5 +380,10 @@ footer{border-top:1px solid var(--line);padding-block:26px;text-align:center;col
   tick();setInterval(tick,1800);
 })();
 </script>
+<script>
+/* remember this page so the designer's back button returns here */
+(function(){try{var from=encodeURIComponent(location.href.split("#")[0]);document.querySelectorAll('a[href="designer.html"]').forEach(function(a){a.href="designer.html?from="+from;});}catch(e){}})();
+</script>
+<div style="text-align:center;color:#46546a;font-size:11px;padding:0 0 18px;font-family:monospace;direction:ltr">v2026.11.17-d</div>
 </body>
 </html>
