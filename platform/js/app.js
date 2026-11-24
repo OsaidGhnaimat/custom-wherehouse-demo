@@ -28,7 +28,7 @@ var MENU=[
  {k:"reports",t:"التقارير والتحليلات",r:"reports",i:"chart"},
  {k:"sys",t:"إعدادات النظام والتكاملات",i:"plug",sub:[["التكاملات مع ERP","integrations","integrations"],["إعدادات النظام","settings","settings"],["مركز الإشعارات","notifications","dashboard"]]}
 ];
-var PORTAL_NAV={customer:[["الرئيسية","portal/home"],["مخزوني","portal/stock"],["طلباتي","portal/requests"],["سجل الحركات","portal/moves"],["الفواتير","portal/billing"]],supplier:[["الرئيسية","supplier/home"],["حجز موعد توريد","supplier/book"],["سجل التسليمات","supplier/history"]]};
+var PORTAL_NAV={customer:[["الرئيسية","portal/home"],["مخزوني","portal/stock"],["طلباتي","portal/requests"],["سجل الحركات","portal/moves"],["الفواتير","portal/billing"]],supplier:[["الرئيسية","supplier/home"],["حجز موعد توريد","supplier/book"],["موادي","supplier/materials"],["سجل التسليمات","supplier/history"]]};
 
 /* ---------- routing ---------- */
 App.parse=function(){var h=location.hash.replace(/^#\/?/,""),q={},i=h.indexOf("?");if(i>-1){h.slice(i+1).split("&").forEach(function(p){var kv=p.split("=");q[kv[0]]=decodeURIComponent(kv[1]||"");});h=h.slice(0,i);}return {seg:h.split("/").filter(Boolean),q:q,raw:h};};
